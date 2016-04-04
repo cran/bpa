@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<meta name="author" content="Brandon M. Greenwell" />
+
+<meta name="date" content="2016-04-03" />
+
+<title>A Guide to Basic Pattern Analysis in R</title>
+
+
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+div.sourceCode { overflow-x: auto; }
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+code > span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code > span.dt { color: #902000; } /* DataType */
+code > span.dv { color: #40a070; } /* DecVal */
+code > span.bn { color: #40a070; } /* BaseN */
+code > span.fl { color: #40a070; } /* Float */
+code > span.ch { color: #4070a0; } /* Char */
+code > span.st { color: #4070a0; } /* String */
+code > span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code > span.ot { color: #007020; } /* Other */
+code > span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code > span.fu { color: #06287e; } /* Function */
+code > span.er { color: #ff0000; font-weight: bold; } /* Error */
+code > span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+code > span.cn { color: #880000; } /* Constant */
+code > span.sc { color: #4070a0; } /* SpecialChar */
+code > span.vs { color: #4070a0; } /* VerbatimString */
+code > span.ss { color: #bb6688; } /* SpecialString */
+code > span.im { } /* Import */
+code > span.va { color: #19177c; } /* Variable */
+code > span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code > span.op { color: #666666; } /* Operator */
+code > span.bu { } /* BuiltIn */
+code > span.ex { } /* Extension */
+code > span.pp { color: #bc7a00; } /* Preprocessor */
+code > span.at { color: #7d9029; } /* Attribute */
+code > span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code > span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code > span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+</style>
+
+
+<link href="data:text/css;charset=utf-8,body%20%7B%0Abackground%2Dcolor%3A%20%23fff%3B%0Amargin%3A%201em%20auto%3B%0Amax%2Dwidth%3A%20700px%3B%0Aoverflow%3A%20visible%3B%0Apadding%2Dleft%3A%202em%3B%0Apadding%2Dright%3A%202em%3B%0Afont%2Dfamily%3A%20%22Open%20Sans%22%2C%20%22Helvetica%20Neue%22%2C%20Helvetica%2C%20Arial%2C%20sans%2Dserif%3B%0Afont%2Dsize%3A%2014px%3B%0Aline%2Dheight%3A%201%2E35%3B%0A%7D%0A%23header%20%7B%0Atext%2Dalign%3A%20center%3B%0A%7D%0A%23TOC%20%7B%0Aclear%3A%20both%3B%0Amargin%3A%200%200%2010px%2010px%3B%0Apadding%3A%204px%3B%0Awidth%3A%20400px%3B%0Aborder%3A%201px%20solid%20%23CCCCCC%3B%0Aborder%2Dradius%3A%205px%3B%0Abackground%2Dcolor%3A%20%23f6f6f6%3B%0Afont%2Dsize%3A%2013px%3B%0Aline%2Dheight%3A%201%2E3%3B%0A%7D%0A%23TOC%20%2Etoctitle%20%7B%0Afont%2Dweight%3A%20bold%3B%0Afont%2Dsize%3A%2015px%3B%0Amargin%2Dleft%3A%205px%3B%0A%7D%0A%23TOC%20ul%20%7B%0Apadding%2Dleft%3A%2040px%3B%0Amargin%2Dleft%3A%20%2D1%2E5em%3B%0Amargin%2Dtop%3A%205px%3B%0Amargin%2Dbottom%3A%205px%3B%0A%7D%0A%23TOC%20ul%20ul%20%7B%0Amargin%2Dleft%3A%20%2D2em%3B%0A%7D%0A%23TOC%20li%20%7B%0Aline%2Dheight%3A%2016px%3B%0A%7D%0Atable%20%7B%0Amargin%3A%201em%20auto%3B%0Aborder%2Dwidth%3A%201px%3B%0Aborder%2Dcolor%3A%20%23DDDDDD%3B%0Aborder%2Dstyle%3A%20outset%3B%0Aborder%2Dcollapse%3A%20collapse%3B%0A%7D%0Atable%20th%20%7B%0Aborder%2Dwidth%3A%202px%3B%0Apadding%3A%205px%3B%0Aborder%2Dstyle%3A%20inset%3B%0A%7D%0Atable%20td%20%7B%0Aborder%2Dwidth%3A%201px%3B%0Aborder%2Dstyle%3A%20inset%3B%0Aline%2Dheight%3A%2018px%3B%0Apadding%3A%205px%205px%3B%0A%7D%0Atable%2C%20table%20th%2C%20table%20td%20%7B%0Aborder%2Dleft%2Dstyle%3A%20none%3B%0Aborder%2Dright%2Dstyle%3A%20none%3B%0A%7D%0Atable%20thead%2C%20table%20tr%2Eeven%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0A%7D%0Ap%20%7B%0Amargin%3A%200%2E5em%200%3B%0A%7D%0Ablockquote%20%7B%0Abackground%2Dcolor%3A%20%23f6f6f6%3B%0Apadding%3A%200%2E25em%200%2E75em%3B%0A%7D%0Ahr%20%7B%0Aborder%2Dstyle%3A%20solid%3B%0Aborder%3A%20none%3B%0Aborder%2Dtop%3A%201px%20solid%20%23777%3B%0Amargin%3A%2028px%200%3B%0A%7D%0Adl%20%7B%0Amargin%2Dleft%3A%200%3B%0A%7D%0Adl%20dd%20%7B%0Amargin%2Dbottom%3A%2013px%3B%0Amargin%2Dleft%3A%2013px%3B%0A%7D%0Adl%20dt%20%7B%0Afont%2Dweight%3A%20bold%3B%0A%7D%0Aul%20%7B%0Amargin%2Dtop%3A%200%3B%0A%7D%0Aul%20li%20%7B%0Alist%2Dstyle%3A%20circle%20outside%3B%0A%7D%0Aul%20ul%20%7B%0Amargin%2Dbottom%3A%200%3B%0A%7D%0Apre%2C%20code%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0Aborder%2Dradius%3A%203px%3B%0Acolor%3A%20%23333%3B%0Awhite%2Dspace%3A%20pre%2Dwrap%3B%20%0A%7D%0Apre%20%7B%0Aborder%2Dradius%3A%203px%3B%0Amargin%3A%205px%200px%2010px%200px%3B%0Apadding%3A%2010px%3B%0A%7D%0Apre%3Anot%28%5Bclass%5D%29%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0A%7D%0Acode%20%7B%0Afont%2Dfamily%3A%20Consolas%2C%20Monaco%2C%20%27Courier%20New%27%2C%20monospace%3B%0Afont%2Dsize%3A%2085%25%3B%0A%7D%0Ap%20%3E%20code%2C%20li%20%3E%20code%20%7B%0Apadding%3A%202px%200px%3B%0A%7D%0Adiv%2Efigure%20%7B%0Atext%2Dalign%3A%20center%3B%0A%7D%0Aimg%20%7B%0Abackground%2Dcolor%3A%20%23FFFFFF%3B%0Apadding%3A%202px%3B%0Aborder%3A%201px%20solid%20%23DDDDDD%3B%0Aborder%2Dradius%3A%203px%3B%0Aborder%3A%201px%20solid%20%23CCCCCC%3B%0Amargin%3A%200%205px%3B%0A%7D%0Ah1%20%7B%0Amargin%2Dtop%3A%200%3B%0Afont%2Dsize%3A%2035px%3B%0Aline%2Dheight%3A%2040px%3B%0A%7D%0Ah2%20%7B%0Aborder%2Dbottom%3A%204px%20solid%20%23f7f7f7%3B%0Apadding%2Dtop%3A%2010px%3B%0Apadding%2Dbottom%3A%202px%3B%0Afont%2Dsize%3A%20145%25%3B%0A%7D%0Ah3%20%7B%0Aborder%2Dbottom%3A%202px%20solid%20%23f7f7f7%3B%0Apadding%2Dtop%3A%2010px%3B%0Afont%2Dsize%3A%20120%25%3B%0A%7D%0Ah4%20%7B%0Aborder%2Dbottom%3A%201px%20solid%20%23f7f7f7%3B%0Amargin%2Dleft%3A%208px%3B%0Afont%2Dsize%3A%20105%25%3B%0A%7D%0Ah5%2C%20h6%20%7B%0Aborder%2Dbottom%3A%201px%20solid%20%23ccc%3B%0Afont%2Dsize%3A%20105%25%3B%0A%7D%0Aa%20%7B%0Acolor%3A%20%230033dd%3B%0Atext%2Ddecoration%3A%20none%3B%0A%7D%0Aa%3Ahover%20%7B%0Acolor%3A%20%236666ff%3B%20%7D%0Aa%3Avisited%20%7B%0Acolor%3A%20%23800080%3B%20%7D%0Aa%3Avisited%3Ahover%20%7B%0Acolor%3A%20%23BB00BB%3B%20%7D%0Aa%5Bhref%5E%3D%22http%3A%22%5D%20%7B%0Atext%2Ddecoration%3A%20underline%3B%20%7D%0Aa%5Bhref%5E%3D%22https%3A%22%5D%20%7B%0Atext%2Ddecoration%3A%20underline%3B%20%7D%0A%0Acode%20%3E%20span%2Ekw%20%7B%20color%3A%20%23555%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Edt%20%7B%20color%3A%20%23902000%3B%20%7D%20%0Acode%20%3E%20span%2Edv%20%7B%20color%3A%20%2340a070%3B%20%7D%20%0Acode%20%3E%20span%2Ebn%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Efl%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Ech%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Est%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Eco%20%7B%20color%3A%20%23888888%3B%20font%2Dstyle%3A%20italic%3B%20%7D%20%0Acode%20%3E%20span%2Eot%20%7B%20color%3A%20%23007020%3B%20%7D%20%0Acode%20%3E%20span%2Eal%20%7B%20color%3A%20%23ff0000%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Efu%20%7B%20color%3A%20%23900%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%20code%20%3E%20span%2Eer%20%7B%20color%3A%20%23a61717%3B%20background%2Dcolor%3A%20%23e3d2d2%3B%20%7D%20%0A" rel="stylesheet" type="text/css" />
+
+</head>
+
+<body>
+
+
+
+<div class="fluid-row" id="header">
+
+
+<h1 class="title">A Guide to Basic Pattern Analysis in R</h1>
+<h4 class="author"><em>Brandon M. Greenwell</em></h4>
+<h4 class="date"><em>2016-04-03</em></h4>
+
+</div>
+
+
+<div id="what-is-basic-pattern-analysis" class="section level2">
+<h2>What is basic pattern analysis?</h2>
+<p>Basic pattern analysis, as implemented in the R package <code>bpa</code>, is a data pre-processing tool and is designed to help reduce the time spent doing various pre-processing tasks. It takes inspiration from some of the functionality of <a href="https://support.sas.com/documentation/onlinedoc/dfdmstudio/">SAS/DataFlux Data Management Studio</a>. More specifically, the functions in <code>bpa</code> help standardize the data so that multiple formatting issues, typos, and other unexpected outcomes can more easily be identified in unfamiliar and/or large amounts of data.</p>
+</div>
+<div id="what-is-the-bpa-package" class="section level2">
+<h2>What is the <code>bpa</code> package?</h2>
+<p>Package <code>bpa</code>, through the function <code>basic_pattern_analysis</code>, allows the analyst to run basic pattern analyses on character sets, digits, or combined input containing both characters and numeric digits. It is useful for data cleaning and for identifying columns containing multiple or nonstandard formats.</p>
+<p>For illustration, this package comes with a simulated data set containing 1000 observations on three variables:</p>
+<ol style="list-style-type: decimal">
+<li><code>Gender</code> - Gender of subject.</li>
+<li><code>Date</code> - Date of observation.</li>
+<li><code>Phone</code> - Subject’s phone number.</li>
+</ol>
+<p>The following snipped of code loads the package, sample data, and prints out the first six observations.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Load the package</span>
+<span class="kw">library</span>(bpa)  <span class="co"># pipe operator %&gt;% included for convenience</span>
+
+<span class="co"># Load the data</span>
+<span class="kw">data</span>(messy, <span class="dt">package =</span> <span class="st">&quot;bpa&quot;</span>)
+<span class="kw">head</span>(messy)</code></pre></div>
+<pre><code>##   Gender             Date         Phone
+## 1 Female        16Aug2001   571 972 510
+## 2   Male       2009-08-21   090 875 285
+## 3      M       01/22/2004 (079)-200-150
+## 4   male       09/02/2008 (129)-006-808
+## 5   Male February 19 2006   016 651 851
+## 6 Female        16Nov2015 (492)-455-108</code></pre>
+<p>Immediately we can see that all of the variables have mixed format. For example, in the <code>Gender</code> column, a male is represented as a <code>Male</code>, <code>male</code>, or <code>M</code>. This often happens when data are input manually, or are the result from merging multiple data sources. Of course we could also just print out the unique of a column, but a variable like <code>Date</code> or <code>Phone</code> in a large data base would likely have too many unique values for this approach to be useful. Instead, the <code>bpa</code> package tries to standardize each column in a way that produces the least amount of unique value so that issues like this become more apparent.</p>
+</div>
+<div id="basic-usage" class="section level2">
+<h2>Basic usage</h2>
+<p>The core function in <code>bpa</code> is <code>get_pattern</code>. This function is used to extract patterns from a vector of data. This function will transform the values so that all numeric digits are represented by the character <code>9</code>. Similarly, all lowercase and uppercase letters are represented by the characters <code>a</code> and <code>A</code>, respectively. Everything else (e.g., special characters like -, @, #, etc.) remains the same. The only exception are whitespace characters which are represented as <code>w</code> if <code>show_ws = TRUE</code> (by default). This can be changed to any character string using the <code>ws_char</code> option. For example,</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">get_pattern</span>(<span class="st">&quot;(123)  456-789&quot;</span>)</code></pre></div>
+<pre><code>## [1] &quot;(999)ww999-999&quot;</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">get_pattern</span>(<span class="st">&quot;(123)  456-789&quot;</span>, <span class="dt">show_ws =</span> <span class="ot">FALSE</span>)  <span class="co"># same as ws_char = &quot; &quot;</span></code></pre></div>
+<pre><code>## [1] &quot;(999)  999-999&quot;</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">get_pattern</span>(<span class="st">&quot;(123)  456-789&quot;</span>, <span class="dt">ws_char =</span> <span class="st">&quot;&lt;ws&gt;&quot;</span>)</code></pre></div>
+<pre><code>## [1] &quot;(999)&lt;ws&gt;&lt;ws&gt;999-999&quot;</code></pre>
+<p>Getting back to the example data, consider the <code>Date</code> column. We can easily extract the unique patterns and their corresponding frequencies:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">messy$Date %&gt;%
+<span class="st">  </span>get_pattern %&gt;%<span class="st">  </span><span class="co"># extract patterns</span>
+<span class="st">  </span>table %&gt;%<span class="st">        </span><span class="co"># tabulate frequencies</span>
+<span class="st">  </span>as.data.frame    <span class="co"># display as a data frame</span></code></pre></div>
+<pre><code>##                    . Freq
+## 1         99/99/9999  259
+## 2         9999-99-99  262
+## 3          99Aaa9999  241
+## 4  Aaaaaaaaaw99w9999   19
+## 5   Aaaaaaaaw99w9999   56
+## 6    Aaaaaaaw99w9999   45
+## 7     Aaaaaaw99w9999   24
+## 8      Aaaaaw99w9999   36
+## 9       Aaaaw99w9999   42
+## 10       Aaaw99w9999   16</code></pre>
+<p>It appears as though the <code>Date</code> column contains four different date formats – which is a problem since <code>R</code> requires dates to have a standard unambiguous format. Perhaps the data were entered in by different people, or the data are the result of a merge from multiple sources? Nonetheless, now that we have identified a problem, we can easily correct it by converting to a single standard date format. On the other hand, if we just looked at the unique values of <code>Date</code> without first standardizing the data, it would have been more difficult to identify all of the formatting problems.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">messy$Date %&gt;%
+<span class="st">  </span>unique %&gt;%<span class="st">    </span><span class="co"># extract unique values</span>
+<span class="st">  </span><span class="kw">head</span>(<span class="dv">50</span>)      <span class="co"># look at first 50 observations</span></code></pre></div>
+<pre><code>##  [1] &quot;16Aug2001&quot;         &quot;2009-08-21&quot;        &quot;01/22/2004&quot;       
+##  [4] &quot;09/02/2008&quot;        &quot;February 19 2006&quot;  &quot;16Nov2015&quot;        
+##  [7] &quot;2004-07-12&quot;        &quot;24Sep2013&quot;         &quot;November 01 2007&quot; 
+## [10] &quot;2007-08-15&quot;        &quot;August 22 2009&quot;    &quot;2003-05-29&quot;       
+## [13] &quot;2011-04-02&quot;        &quot;October 29 2004&quot;   &quot;2004-09-13&quot;       
+## [16] &quot;25Nov2009&quot;         &quot;02/12/2010&quot;        &quot;23Jan2008&quot;        
+## [19] &quot;06/30/2006&quot;        &quot;2009-07-24&quot;        &quot;December 02 2013&quot; 
+## [22] &quot;14Jun2014&quot;         &quot;2009-04-19&quot;        &quot;09/03/2009&quot;       
+## [25] &quot;November 25 2007&quot;  &quot;18Jan2015&quot;         &quot;2009-03-05&quot;       
+## [28] &quot;10/24/2006&quot;        &quot;09/09/2008&quot;        &quot;September 08 2012&quot;
+## [31] &quot;12/31/2011&quot;        &quot;11/12/2009&quot;        &quot;09/23/2002&quot;       
+## [34] &quot;10/09/2002&quot;        &quot;2004-12-11&quot;        &quot;2001-08-23&quot;       
+## [37] &quot;02/09/2004&quot;        &quot;November 02 2010&quot;  &quot;03/14/2007&quot;       
+## [40] &quot;24Dec2004&quot;         &quot;March 10 2004&quot;     &quot;November 05 2012&quot; 
+## [43] &quot;2010-02-11&quot;        &quot;12/25/2009&quot;        &quot;October 25 2007&quot;  
+## [46] &quot;2011-07-22&quot;        &quot;April 01 2014&quot;     &quot;18Mar2009&quot;        
+## [49] &quot;06Feb2015&quot;         &quot;2015-12-10&quot;</code></pre>
+<p>Standardizing the data via basic pattern analysis provides a much cleaner representation of the data that is often more useful during the pre-processing step.</p>
+<p>The function <code>basic_pattern_analysis</code> applies <code>get_pattern</code> to each column of a data frame and, by default, returns a <code>&quot;dataframe&quot;</code> object of the same size. This function is especially useful when working with big, messy, and unfamiliar data sets. The following snippet of code exemplifies this by highlighting potential issues in the entire <code>messy</code> data set.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Standardize the entire data set (returns a data frame)</span>
+messy %&gt;%
+<span class="st">  </span>basic_pattern_analysis %&gt;%<span class="st">  </span><span class="co"># note: you can also use bpa for short</span>
+<span class="st">  </span><span class="kw">head</span>(<span class="dv">10</span>)                    <span class="co"># only look at first 10 observations</span></code></pre></div>
+<pre><code>##    Gender             Date         Phone
+## 1  Aaaaaa        99Aaa9999   999w999w999
+## 2    Aaaa       9999-99-99   999w999w999
+## 3       A       99/99/9999 (999)-999-999
+## 4    aaaa       99/99/9999 (999)-999-999
+## 5    Aaaa Aaaaaaaaw99w9999   999w999w999
+## 6  Aaaaaa        99Aaa9999 (999)-999-999
+## 7  Aaaaaa       9999-99-99 (999)w999w999
+## 8  Aaaaaa        99Aaa9999   999-999-999
+## 9    aaaa Aaaaaaaaw99w9999   999w999w999
+## 10 Aaaaaa       9999-99-99   999-999-999</code></pre>
+<p>Also, to save typing, we have included <code>bpa</code> as an alias for <code>basic_pattern_analysis</code>.</p>
+<p>With lots of data, it will often be more useful to view a list containing only the unique patterns for each column of a data frame. This can be accomplished by setting <code>unique_only = TRUE</code>.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Only return unique patterns (returns a list)</span>
+<span class="kw">bpa</span>(messy, <span class="dt">unique_only =</span> <span class="ot">TRUE</span>)</code></pre></div>
+<pre><code>## $Gender
+## 
+##      A   Aaaa Aaaaaa   aaaa aaaaaa 
+##    189    312    291    110     98 
+## 
+## $Date
+## 
+##        99/99/9999        9999-99-99         99Aaa9999 Aaaaaaaaaw99w9999 
+##               259               262               241                19 
+##  Aaaaaaaaw99w9999   Aaaaaaaw99w9999    Aaaaaaw99w9999     Aaaaaw99w9999 
+##                56                45                24                36 
+##      Aaaaw99w9999       Aaaw99w9999 
+##                42                16 
+## 
+## $Phone
+## 
+## (999)-999-999 (999)w999w999   999-999-999   999w999w999 
+##           242           250           276           232</code></pre>
+<p>Finally, we have included the function <code>match_pattern</code> for extracting the values of a vector that match a specified pattern. For example, the following code chunk will extract the unique values of <code>Gender</code> that match the standardized pattern <code>Aaaa</code>.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Extract Gender values matching the pattern &quot;Aaaa&quot;</span>
+<span class="kw">match_pattern</span>(messy$Gender, <span class="dt">pattern =</span> <span class="st">&quot;Aaaa&quot;</span>, <span class="dt">unique_only =</span> <span class="ot">TRUE</span>)</code></pre></div>
+<pre><code>## [1] &quot;Male&quot;</code></pre>
+</div>
+
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
